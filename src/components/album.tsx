@@ -1,14 +1,17 @@
+import { group } from 'console';
 import { useEffect, useState } from 'react';
 import { GroupBy } from './common';
 import SongListComponent from './songlist';
-import { Loader, Sortasc, Sortdesc } from './svgicons';
+import { Loader, NextIcon, Sortasc, Sortdesc } from './svgicons';
 
 function Album(props: any) {
     const [songs, setSongs]: any = useState(props.songsList);
+    const [view, setView]: any = useState("web");
     const [groups, setGroups]: any = useState({
         view: "album",
         group: {},
-        currentList: []
+        currentList: [],
+        tempgroup: {},
     });
     const [selection, setSelection]: any = useState({
         sort: -1,
@@ -19,21 +22,57 @@ function Album(props: any) {
         setGroups({
             ...groups,
             group,
+            tempgroup: group
         })
+        window.addEventListener('resize', (): void => {
+            if (window.innerWidth <= 1020) {
+                setView('mobile')
+                // props.onResize({
+                //     status: props.view.status,
+                //     view: "mobile"
+                // })
+            } else {
+                setView('web')
+                // props.onResize({
+                //     status: props.view.status,
+                //     view: "web"
+                // })
+            }
+        })
+        setView(props.view.view)
     }, [props])
     return (
-        <div className='mu-asw-albumlist'>
+        <div className={view == 'web' ? 'mu-asw-albumlist' : props.view.status ? 'mu-asw-albumlist mobile active' : 'mu-asw-albumlist mobile'}>
             {
                 groups.view == "album" ?
                     <>
-                        <div className="filter">
+                        <div className={props.view.status ? "mu-asw-filter mu-asw-filterback" : "mu-asw-filter"}>
+                            {
+                                props.view.status ?
+                                    <div
+                                        className="mu-asw-back"
+                                        onClick={() => {
+                                            props.onView();
+                                        }}
+                                    >
+                                        <NextIcon color="var(--mu-asw-text-theme)" />
+                                    </div> :
+                                    <></>
+                            }
                             <input
                                 type="search"
                                 placeholder="filter album"
                                 onChange={(e: any) => {
-                                    let a = JSON.parse(JSON.stringify(props.songsList));
-                                    let b = a.filter((name: any) => { return name.songname.includes(e.target.value) })
-                                    setSongs(b);
+                                    let a = JSON.parse(JSON.stringify(groups.tempgroup));
+                                    let b = Object.keys(a).filter((name: any) => {
+                                        return name.toLowerCase().includes(e.target.value.toLowerCase())
+                                    }).reduce((name: any, key: any) =>
+                                        (name[key] = a[key], name), {}
+                                    )
+                                    setGroups({
+                                        ...groups,
+                                        group: b
+                                    });
                                 }}
                             />
                             <div
@@ -105,6 +144,7 @@ function Album(props: any) {
                         next={
                             (e: number) => { props.next(e) }
                         }
+                        isPlaying={props.isPlaying}
                         currentSong={props.currentSong}
                         onBack={() => {
                             setGroups({

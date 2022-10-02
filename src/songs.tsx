@@ -23,14 +23,14 @@ export const songsList: any = [
     },
     {
         id: 3,
-        album: "Freedom",
+        album: "Gain",
         songname: "aaha_enbargal",
         shortdesc: "The song has some unique content",
         song: "/songs/aaha_enbargal.mp3"
     },
     {
         id: 4,
-        album: "closen",
+        album: "Writer",
         songname: "aalana_naal_mudhala",
         shortdesc: "this content of song having most romantic lines in it.",
         song: "/songs/aalana_naal_mudhala.mp3"

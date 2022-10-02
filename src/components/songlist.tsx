@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
-import { Loader, NextIcon, Sortasc, Sortdesc } from './svgicons';
+import { Loader, NextIcon, PauseLoader, Sortasc, Sortdesc } from './svgicons';
 
 function SongListComponent(props: any) {
     const [songs, setSongs]: any = useState([]);
+    const [view, setView]: any = useState("web");
     const [selection, setSelection]: any = useState({
         sort: -1,
     });
@@ -15,6 +16,22 @@ function SongListComponent(props: any) {
         let lastrecord = firstrecord + 10;
         let obj = props.songsList.slice(firstrecord, lastrecord)
         setSongs(obj);
+        window.addEventListener('resize', (): void => {
+            if (window.innerWidth <= 767) {
+                setView('mobile')
+                // props.onResize({
+                //     status: props.view.status,
+                //     view: "mobile"
+                // })
+            } else {
+                setView('web')
+                // props.onResize({
+                //     status: props.view.status,
+                //     view: "web"
+                // })
+            }
+        })
+        setView(props?.view?.view)
     }, [props])
     const nextpage = () => {
         if (pagination.currentpage !== Math.floor(props.songsList.length / pagination.countperpage)) {
@@ -41,14 +58,29 @@ function SongListComponent(props: any) {
         }
     }
     return (
-        <div className={props.page == "album" ? 'mu-asw-songslist mu-asw-albumsongs' : 'mu-asw-songslist'}>
-            <div className={props.page == "album" ? "mu-asw-filter mu-asw-albumfilter" : "mu-asw-filter"}>
+        <div className=
+            {
+                props.page == "album" ?
+                    'mu-asw-songslist mu-asw-albumsongs' :
+                    view == 'web' ?
+                        'mu-asw-songslist' :
+                        props.view.status ?
+                            'mu-asw-songslist mobile active' :
+                            'mu-asw-songslist mobile'
+            }
+        >
+            <div className={(props.page == "album" || props?.view?.status) ? "mu-asw-filter mu-asw-albumfilter" : "mu-asw-filter"}>
                 {
-                    props.page == "album" ?
+                    (props?.page == "album" || props?.view?.status) ?
                         <div
                             className="mu-asw-back"
                             onClick={() => {
-                                props.onBack();
+                                if (props?.view?.status) {
+                                    props.onView();
+                                }
+                                else {
+                                    props.onBack();
+                                }
                             }}
                         >
                             <NextIcon color="var(--mu-asw-text-theme)" />
@@ -126,7 +158,11 @@ function SongListComponent(props: any) {
                                     <div className="mu-asw-loader">
                                         {
                                             JSON.stringify(song) == JSON.stringify(props.currentSong) ?
-                                                <Loader color="var(--mu-asw-text-theme)" /> : <></>
+                                                props.isPlaying ?
+                                                    <Loader color="var(--mu-asw-text-theme)" /> :
+                                                    <PauseLoader color="var(--mu-asw-text-theme)" />
+                                                :
+                                                <></>
                                         }
                                     </div>
                                 </div>

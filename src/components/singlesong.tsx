@@ -1,10 +1,12 @@
 import * as React from 'react';
-import { Music, NextIcon, NoRepeat, PauseIcon, PlayIcon, RepeatAll, RepeatOne, SoundHighIcon, SoundLowIcon } from './svgicons';
+import { AlbumList, Music, NextIcon, NoRepeat, PauseIcon, PlayIcon, RepeatAll, RepeatOne, SongsList, SoundHighIcon, SoundLowIcon } from './svgicons';
 
 interface typeprops {
     song: any,
     next: any,
     prev: any,
+    playing: (e: boolean) => void,
+    onView: (e: string) => void,
 }
 
 const SingleSong = React.forwardRef((props: typeprops, ref: any) => {
@@ -12,17 +14,19 @@ const SingleSong = React.forwardRef((props: typeprops, ref: any) => {
     const [position, setPosition] = React.useState(0);
     const [paused, setPaused] = React.useState(true);
     const [duration, setDuration] = React.useState(0); // seconds
-    const [songVolume, setSongVolume]: any = React.useState(10);
+    const [songVolume, setSongVolume]: any = React.useState(0);
     const [repeat, setRepeat]: any = React.useState("repeat");
 
     React.useImperativeHandle(ref, () => ({
         play() {
-            songref.current.play()
+            songref.current.play();
+            props.playing(true)
         }
     }))
 
     React.useEffect(() => {
         songref?.current?.play();
+        props.playing(true)
     }, [props.song])
 
     React.useEffect(() => {
@@ -38,7 +42,14 @@ const SingleSong = React.forwardRef((props: typeprops, ref: any) => {
     }, [])
 
     const spacefn = () => {
-        songref.current.paused ? songref.current.play() : songref.current.pause()
+        if (songref?.current?.paused) {
+            songref.current.play()
+            props.playing(true)
+        }
+        else {
+            songref.current.pause()
+            props.playing(false)
+        }
     }
 
     const formatDuration = (value: number) => {
@@ -63,6 +74,7 @@ const SingleSong = React.forwardRef((props: typeprops, ref: any) => {
             setDuration(Math.floor(songref.current.duration));
             setPosition(0);
             songref.current.pause();
+            props.playing(false)
         }
     }
 
@@ -76,8 +88,16 @@ const SingleSong = React.forwardRef((props: typeprops, ref: any) => {
                             alt="can't win - Chilling Sunday"
                             src={props.song?.thmbnail ? props.song?.thmbnail : "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTcRRLllmkEeMbYJ2JV6nj-DvUq8WGaAVhbdYPOFqg_7Nsw3UIdzF6sVZtgtZE46eoSsEw&usqp=CAU"}
                         /> */}
+                        <div className="mu-asw-songlist-icon">
+                            <div className="svg song" onClick={() => { props.onView('songlist') }}>
+                                <SongsList color="var(--mu-asw-text-theme)" width="30" height="30" />
+                            </div>
+                            <div className="svg album" onClick={() => { props.onView('album') }}>
+                                <AlbumList color="var(--mu-asw-text-theme)" width="30" height="30" />
+                            </div>
+                        </div>
                         <div className="mu-asw-nothumb">
-                            <Music color="var(--mu-asw-text-theme)" />
+                            <Music width="100%" color="var(--mu-asw-text-theme)" />
                         </div>
                     </div>
                     <div>
@@ -115,7 +135,14 @@ const SingleSong = React.forwardRef((props: typeprops, ref: any) => {
                         <button
                             className="mu-asw-playpause"
                             onClick={() => {
-                                paused ? songref.current.play() : songref.current.pause()
+                                if (paused) {
+                                    songref.current.play()
+                                    props.playing(true)
+                                }
+                                else {
+                                    songref.current.pause()
+                                    props.playing(false)
+                                }
                             }}
                         >
                             {paused ? (

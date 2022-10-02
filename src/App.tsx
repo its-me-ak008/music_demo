@@ -10,8 +10,8 @@ function App() {
 	return (
 		<Player
 			songsList={songsList}
-			bgColor={"lightgrey"}
-			textColor={"grey"}
+			bgColor={"#11b26a"}
+			textColor={"black"}
 			songsListView={true}
 			albumView={true}
 		/>
